@@ -94,3 +94,15 @@ void LazorBeam::hitSomething(Character *plr) {
 bool LazorBeam::isEnemys() {
     return enemyBeam;
 }
+
+QPoint LazorBeam::tileDirection() const {
+    if(direction.x() > 0)
+        return QPoint(1, 0);
+    if(direction.x() < 0)
+        return QPoint(-1, 0);
+    if(direction.y() > 0)
+        return QPoint(0, 1);
+    if(direction.y() < 0)
+        return QPoint(0, -1);
+    return QPoint();
+}

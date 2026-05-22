@@ -25,7 +25,7 @@ void PlayerSelectionMenu::paint(QPainter *painter, const QStyleOptionGraphicsIte
     pen.setBrush(QBrush(palette.color(6)));
     painter->setPen(pen);
     painter->drawText(50,20, "carambola pyre presents");
-    painter->drawText(20,62, "Press 1+2 on nearest Wiimote to join");
+    painter->drawText(20,62, "Press 1+2 on Wiimote, K or A to join");
     painter->drawText(20,184, "+ to continue, - to clear players");
     int ypos = 80;
     int xpos = 10;
@@ -37,9 +37,12 @@ void PlayerSelectionMenu::paint(QPainter *painter, const QStyleOptionGraphicsIte
                 ypos = 80;
             }
             QString ctrlType = "Keyboard";
-            QString ctrlId = "";
-            if(p->controllerType() == 1) {
+            QString ctrlId = "Arrows/HJKL";
+            if(p->controllerType() == 0 && p->controllerId() == 1) {
+                ctrlId = "WASD/Tab";
+            } else if(p->controllerType() == 1) {
                 ctrlType = "Wiimote";
+                ctrlId = "";
                 if(p->controllerId()==0) ctrlId = "[*   ]";
                 if(p->controllerId()==1) ctrlId = "[ *  ]";
                 if(p->controllerId()==2) ctrlId = "[  * ]";
@@ -48,6 +51,9 @@ void PlayerSelectionMenu::paint(QPainter *painter, const QStyleOptionGraphicsIte
                 if(p->controllerId()==5) ctrlId = "[* **]";
                 if(p->controllerId()==6) ctrlId = "[** *]";
                 if(p->controllerId()==7) ctrlId = "[*** ]";
+            } else if(p->controllerType() == 2) {
+                ctrlType = "Auto";
+                ctrlId = "";
             }
             painter->drawText(xpos+30,ypos, "Player " +
                               QString::number(players.indexOf(p)+1));

@@ -10,6 +10,7 @@ QT += widgets
 TARGET = wow
 TEMPLATE = app
 CONFIG   += link_pkgconfig
+DEFINES += WOW_SOURCE_DIR=\\\"$$PWD\\\"
 
 macx:contains(QMAKE_HOST.arch, arm64):QMAKE_CXXFLAGS += -include arm_acle.h
 
@@ -58,6 +59,7 @@ SOURCES += main.cpp\
     gamemodedeathmatch.cpp \
     gamemode.cpp \
     gamemodeclassic.cpp \
+    autoplayercontroller.cpp \
     characters/burwor.cpp \
     characters/worrior.cpp \
     characters/enemycharacter.cpp \
@@ -92,6 +94,7 @@ HEADERS  += mainwindow.h \
     gamemodedeathmatch.h \
     gamemode.h \
     gamemodeclassic.h \
+    autoplayercontroller.h \
     characters/burwor.h \
     characters/worrior.h \
     characters/enemycharacter.h \
@@ -109,3 +112,19 @@ FORMS    += mainwindow.ui
 OTHER_FILES += \
     maps_wow.txt \
     maps_bomberman.txt
+
+macx {
+    maps.files = $$PWD/maps_wow.txt $$PWD/maps_bomberman.txt
+    maps.path = Contents/Resources
+
+    font.files = $$PWD/Adore64.ttf
+    font.path = Contents/Resources
+
+    sprites.files = $$files($$PWD/wow-sprites/*)
+    sprites.path = Contents/Resources/wow-sprites
+
+    samples.files = $$files($$PWD/samples/*.wav)
+    samples.path = Contents/Resources/samples
+
+    QMAKE_BUNDLE_DATA += maps font sprites samples
+}

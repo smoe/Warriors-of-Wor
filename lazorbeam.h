@@ -23,6 +23,7 @@ public:
     void tick(float dt);
     void hitSomething(Character *plr = 0);
     bool isEnemys();
+    QPoint tileDirection() const;
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 signals:

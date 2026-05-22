@@ -35,13 +35,19 @@ void Worrior::setDirection(QPoint dir) {
 
 void Worrior::resetCharacter() {
     //qDebug() << Q_FUNC_INFO << "PlayerNumer: " << playerNumber;
-    if(playfield->spawnPoint(playerNumber))
-        setPos(playfield->spawnPoint(playerNumber)->pos());
+    SpawnTile *spawn = playfield->spawnPoint(playerNumber);
+    if(spawn)
+        setPos(spawn->pos());
     spawned = false;
     spawned = false;
     canspawn = false;
     setControllable(false);
     Character::resetCharacter();
+    if(spawn && !spawn->direction().isNull()) {
+        updateSprite(spawn->direction());
+        animationTimer.stop();
+        characterStopped = true;
+    }
 }
 
 void Worrior::tick(float dt) {

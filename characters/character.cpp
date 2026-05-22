@@ -225,6 +225,15 @@ void Character::setDirection(QPoint dir) {
     controlDir = dir;
 }
 
+void Character::look(QPoint dir) {
+    if(dir.isNull() || (dir.x() && dir.y()))
+        return;
+
+    updateSprite(dir);
+    animationTimer.stop();
+    characterStopped = true;
+}
+
 MapTile *Character::currentTile() {
     return playfield->tileAt(pos());
 }
@@ -368,6 +377,14 @@ QColor Character::color() const {
 
 QPointF Character::direction() const {
     return _direction;
+}
+
+QPoint Character::aimDirection() const {
+    return spriteDir;
+}
+
+bool Character::weaponReady() const {
+    return weaponType() != WEAPON_LAZOR || lazorBeam == nullptr;
 }
 
 void Character::setWeaponType(Character::WeaponType newWeaponType)

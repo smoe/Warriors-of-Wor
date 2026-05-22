@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "autoplayercontroller.h"
 
 int playerColors[8] = {6, 7, 8, 0xF, 3, 2, 0xD, 9};
 
 MainWindow::MainWindow(QWidget *parent) : QGraphicsView(parent), samples(), field(this, characters) {
     QFontDatabase fontdb;
     fontdb.addApplicationFont("Adore64.ttf");
-    keyboardPlayerCreated = false;
+    keyboardPlayerCount = 0;
     gameMode = 0;
     setScene(field.scene());
     connect(&mainTimer, SIGNAL(timeout()), this, SLOT(loopTimeout()));
@@ -60,20 +61,50 @@ void MainWindow::loopTimeout() {
 void MainWindow::keyPressEvent (QKeyEvent * e) {
     if(e->isAutoRepeat()) return;
     QPoint oldDir = controllerDir;
-    if(e->key()==Qt::Key_Left) {
+    QPoint oldSecondDir = secondControllerDir;
+
+    if(e->key()==Qt::Key_A && gameState == GS_PLAYER_SELECT && characters.size()<8) {
+        Player *p = new Player(this,
+                               &field,
+                               &samples,
+                               C64Palette::color(playerColors[characters.size()]),
+                               2,0,
+                               characters.size());
+        AutoPlayerController *controller = new AutoPlayerController(p, &field, characters, p);
+        setupPlayer(p, controller);
+        e->accept();
+    } else if(e->key()==Qt::Key_K && gameState == GS_PLAYER_SELECT && keyboardPlayerCount<2 && characters.size()<8) {
+        addKeyboardPlayer();
+        e->accept();
+    } else if(e->key()==Qt::Key_Left || e->key()==Qt::Key_H) {
         controllerDir=QPoint(-1,0);
         e->accept();
-    } else if(e->key()==Qt::Key_Right) {
+    } else if(e->key()==Qt::Key_Right || e->key()==Qt::Key_L) {
         controllerDir=QPoint(1,0);
         e->accept();
-    } else if(e->key()==Qt::Key_Up) {
+    } else if(e->key()==Qt::Key_Up || e->key()==Qt::Key_K) {
         controllerDir=QPoint(0,-1);
         e->accept();
-    } else if(e->key()==Qt::Key_Down) {
+    } else if(e->key()==Qt::Key_Down || e->key()==Qt::Key_J) {
         controllerDir=QPoint(0,1);
+        e->accept();
+    } else if(e->key()==Qt::Key_W) {
+        secondControllerDir=QPoint(0,-1);
+        e->accept();
+    } else if(e->key()==Qt::Key_A) {
+        secondControllerDir=QPoint(-1,0);
+        e->accept();
+    } else if(e->key()==Qt::Key_D) {
+        secondControllerDir=QPoint(1,0);
+        e->accept();
+    } else if(e->key()==Qt::Key_S && gameState == GS_RUNNING) {
+        secondControllerDir=QPoint(0,1);
         e->accept();
     } else if(e->key()==Qt::Key_Space) {
         emit buttonPressed(1);
+        e->accept();
+    } else if(e->key()==Qt::Key_Tab) {
+        emit secondKeyboardButtonPressed(1);
         e->accept();
     } else if(e->key()==Qt::Key_R) {
         emit buttonPressed(8);
@@ -94,20 +125,12 @@ void MainWindow::keyPressEvent (QKeyEvent * e) {
             showFullScreen();
         }
         e->accept();
-    } else if(e->key()==Qt::Key_K && gameState == 0 /*&& !keyboardPlayerCreated*/ && characters.size()<8) {
-        Player *p = new Player(this,
-                               &field,
-                               &samples,
-                               C64Palette::color(playerColors[characters.size()]),
-                               0,0,
-                               characters.size());
-        setupPlayer(p, this);
-        keyboardPlayerCreated = true;
-        e->accept();
     }
 
     if(controllerDir != oldDir)
         emit controlInput(controllerDir);
+    if(secondControllerDir != oldSecondDir)
+        emit secondKeyboardControlInput(secondControllerDir);
     if(!e->isAccepted())
         e->ignore();
 }
@@ -119,9 +142,39 @@ void MainWindow::setupPlayer(Player* p, QObject *controller) {
 
     field.scene()->addItem(p);
     connect(controller, SIGNAL(controlInput(QPoint)), p, SLOT(setDirection(QPoint)));
+    AutoPlayerController *autoController = qobject_cast<AutoPlayerController*>(controller);
+    if(autoController)
+        connect(autoController, SIGNAL(aimInput(QPoint)), p, SLOT(look(QPoint)));
     connect(controller, SIGNAL(buttonPressed(int)), p, SLOT(fire(int)));
     emit playerFound(p);
     samples.spawn();
+}
+
+void MainWindow::setupSecondKeyboardPlayer(Player *p) {
+    p->resetCharacter();
+
+    characters.append(p);
+
+    field.scene()->addItem(p);
+    connect(this, SIGNAL(secondKeyboardControlInput(QPoint)), p, SLOT(setDirection(QPoint)));
+    connect(this, SIGNAL(secondKeyboardButtonPressed(int)), p, SLOT(fire(int)));
+    emit playerFound(p);
+    samples.spawn();
+}
+
+void MainWindow::addKeyboardPlayer() {
+    Player *p = new Player(this,
+                           &field,
+                           &samples,
+                           C64Palette::color(playerColors[characters.size()]),
+                           0,keyboardPlayerCount,
+                           characters.size());
+    if(keyboardPlayerCount == 0) {
+        setupPlayer(p, this);
+    } else {
+        setupSecondKeyboardPlayer(p);
+    }
+    keyboardPlayerCount++;
 }
 
 void MainWindow::stopGame() {
@@ -132,16 +185,27 @@ void MainWindow::stopGame() {
 void MainWindow::keyReleaseEvent (QKeyEvent * e) {
     if(e->isAutoRepeat()) return;
     QPoint oldDir = controllerDir;
-    if(e->key()==Qt::Key_Left || e->key()==Qt::Key_Right) {
+    QPoint oldSecondDir = secondControllerDir;
+    if(e->key()==Qt::Key_Left || e->key()==Qt::Key_Right ||
+            e->key()==Qt::Key_H || e->key()==Qt::Key_L) {
         controllerDir.setX(0);
         e->accept();
-    } else if(e->key()==Qt::Key_Up || e->key()==Qt::Key_Down) {
+    } else if(e->key()==Qt::Key_Up || e->key()==Qt::Key_Down ||
+              e->key()==Qt::Key_K || e->key()==Qt::Key_J) {
         controllerDir.setY(0);
+        e->accept();
+    } else if(e->key()==Qt::Key_A || e->key()==Qt::Key_D) {
+        secondControllerDir.setX(0);
+        e->accept();
+    } else if(e->key()==Qt::Key_W || e->key()==Qt::Key_S) {
+        secondControllerDir.setY(0);
         e->accept();
     }
 
     if(controllerDir != oldDir)
         emit controlInput(controllerDir);
+    if(secondControllerDir != oldSecondDir)
+        emit secondKeyboardControlInput(secondControllerDir);
     if(!e->isAccepted())
         e->ignore();
 }
@@ -220,7 +284,9 @@ void MainWindow::resetPlayers() {
         characters.removeOne(c);
         c->deleteLater();
     }
-    keyboardPlayerCreated = 0;
+    keyboardPlayerCount = 0;
+    controllerDir = QPoint();
+    secondControllerDir = QPoint();
 }
 
 

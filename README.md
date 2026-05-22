@@ -139,8 +139,10 @@ sprites, sounds, and the font resolve correctly.
 Useful keyboard controls:
 
  - `K` adds a keyboard player on the player selection screen.
- - Arrow keys move the keyboard player.
- - Space fires.
+ - `A` adds a cooperative automated player on the player selection screen.
+ - Arrow keys or `H`, `J`, `K`, `L` move the first keyboard player.
+ - Space fires for the first keyboard player.
+ - `W`, `A`, `S`, `D` move the second keyboard player, and Tab fires.
  - `S` confirms menu selections.
  - `R` resets the player selection.
  - `F` toggles fullscreen.

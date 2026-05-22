@@ -37,11 +37,14 @@ public:
     bool killsPlayer, isEnemy;
     void setCharacterSpeed(float spd);
     QPointF direction() const;
+    QPoint aimDirection() const;
+    bool weaponReady() const;
     void setWeaponType(WeaponType newWeaponType);
     WeaponType weaponType() const;
 public slots:
     virtual void animationTimeout();
     virtual void setDirection(QPoint dir);
+    void look(QPoint dir);
     void stopShooting();
     void deathBlink();
     virtual void resetCharacter();
