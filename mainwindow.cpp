@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QGraphicsView(parent), samples(), fiel
     connect(this, SIGNAL(playerFound(Player*)), playerSelectionMenu, SLOT(repaintMenu()));
     gameState = GS_PLAYER_SELECT;
     setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
-    setRenderHints(0);
+    setRenderHints(QPainter::RenderHints());
     setOptimizationFlag(QGraphicsView::DontAdjustForAntialiasing);
 //    setOptimizationFlag(QGraphicsView::DontSavePainterState);
     setGeometry(0,0,640, 400);

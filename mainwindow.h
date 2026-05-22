@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QDebug>
 #include <QPoint>
 #include <QKeyEvent>
@@ -63,7 +63,7 @@ private:
     SamplePlayer samples;
     Playfield field;
     QTimer mainTimer;
-    QTime time;
+    QElapsedTimer time;
     QPoint controllerDir;
     WiimoteFinder wmFinder;
     PlayerSelectionMenu *playerSelectionMenu;

@@ -11,6 +11,8 @@ TARGET = wow
 TEMPLATE = app
 CONFIG   += link_pkgconfig
 
+macx:contains(QMAKE_HOST.arch, arm64):QMAKE_CXXFLAGS += -include arm_acle.h
+
 !contains(CONFIG, no_cwiid) {
     packagesExist(cwiid) {
         PKGCONFIG += cwiid
