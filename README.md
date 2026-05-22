@@ -162,6 +162,9 @@ Patches to build the game on other platforms are welcome.
    benchmarking.
  - Original game mode still has some bugs. Deathmatch should work
    pretty well.
+ - The Worluk death sound is missing. The code expects
+   `samples/worluk_died.wav`, but the original effect has not been recovered
+   yet and may need a new C64-style replacement.
  - More controller options needed (SDL joystick).
  - CRT rendering - see http://filthypants.blogspot.fi/2011/05/more-emulator-pixel-shaders-crt-updated.html
 
