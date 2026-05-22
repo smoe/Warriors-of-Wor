@@ -5,7 +5,11 @@
 #include <QDebug>
 #include <QPoint>
 #include <QTimer>
+#ifdef HAVE_CWIID
 #include <cwiid.h>
+#else
+struct cwiid_wiimote_t;
+#endif
 
 class WiiMote : public QObject
 {

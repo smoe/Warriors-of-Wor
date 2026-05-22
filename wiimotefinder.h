@@ -1,7 +1,11 @@
 #ifndef WIIMOTEFINDER_H
 #define WIIMOTEFINDER_H
 
+#ifdef HAVE_CWIID
 #include <cwiid.h>
+#else
+struct cwiid_wiimote_t;
+#endif
 #include <QDebug>
 #include <QList>
 #include <QObject>

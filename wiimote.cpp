@@ -2,6 +2,7 @@
 
 WiiMote::WiiMote(cwiid_wiimote_t * h, int number) : rumbleTimer(this)
 {
+#ifdef HAVE_CWIID
     Q_ASSERT(h);
     handle = h;
     rumbleTimer.setSingleShot(true);
@@ -13,6 +14,13 @@ WiiMote::WiiMote(cwiid_wiimote_t * h, int number) : rumbleTimer(this)
         setNumber(number);
     }
     currentButtons = 0;
+#else
+    Q_UNUSED(h);
+    handle = 0;
+    rumbleTimer.setSingleShot(true);
+    setNumber(number);
+    currentButtons = 0;
+#endif
 }
 
 WiiMote::~WiiMote() {
@@ -20,12 +28,17 @@ WiiMote::~WiiMote() {
 }
 
 int WiiMote::defaultFlags() {
+#ifdef HAVE_CWIID
     return CWIID_FLAG_MESG_IFC | CWIID_FLAG_NONBLOCK;
+#else
+    return 0;
+#endif
 }
 
 void WiiMote::setNumber(int num) {
-    int flags = 0;
     myNumber = num;
+#ifdef HAVE_CWIID
+    int flags = 0;
     if(num==0) flags = CWIID_LED1_ON;
     if(num==1) flags = CWIID_LED2_ON;
     if(num==2) flags = CWIID_LED3_ON;
@@ -41,16 +54,22 @@ void WiiMote::setNumber(int num) {
         return;
     }
     shake();
+#endif
 }
 
 int WiiMote::id() {
+#ifdef HAVE_CWIID
     return cwiid_get_id(handle);
+#else
+    return -1;
+#endif
 }
 
 int WiiMote::number() {
     return myNumber;
 }
 void WiiMote::pollMote() {
+#ifdef HAVE_CWIID
     if(!handle) return;
     int mesg_count=0;
     union cwiid_mesg *mesg;
@@ -103,17 +122,21 @@ void WiiMote::pollMote() {
             break;
         }
     }
+#endif
 }
 
 void WiiMote::close() {
     qDebug() << Q_FUNC_INFO;
+#ifdef HAVE_CWIID
     if(handle)
         cwiid_close(handle);
+#endif
     handle = 0;
 }
 
 void WiiMote::shake() {
     qDebug() << Q_FUNC_INFO;
+#ifdef HAVE_CWIID
     if(cwiid_command(handle, CWIID_CMD_RUMBLE, 1)) {
         qDebug() << Q_FUNC_INFO << "Unable to set flags";
         close();
@@ -121,9 +144,11 @@ void WiiMote::shake() {
         connect(&rumbleTimer, SIGNAL(timeout()), this, SLOT(stopShaking()), Qt::QueuedConnection);
         rumbleTimer.start(150);
     }
+#endif
 }
 
 void WiiMote::stopShaking() {
+#ifdef HAVE_CWIID
     if(!handle) return;
     if(cwiid_command(handle, CWIID_CMD_RUMBLE, 0)) {
         qDebug() << Q_FUNC_INFO << "Unable to set flags";
@@ -131,4 +156,5 @@ void WiiMote::stopShaking() {
     } else {
 
     }
+#endif
 }

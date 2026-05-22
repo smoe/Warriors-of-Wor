@@ -10,7 +10,18 @@ QT += widgets
 TARGET = wow
 TEMPLATE = app
 CONFIG   += link_pkgconfig
-PKGCONFIG += cwiid sdl2
+PKGCONFIG += sdl2
+
+!contains(CONFIG, no_cwiid) {
+    packagesExist(cwiid) {
+        PKGCONFIG += cwiid
+        DEFINES += HAVE_CWIID
+    } else {
+        message("cwiid not found; Wiimote support disabled")
+    }
+} else {
+    message("cwiid disabled; Wiimote support disabled")
+}
 
 LIBS += -lSDL2_mixer
 

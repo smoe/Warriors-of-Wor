@@ -1,5 +1,9 @@
 #include "wiimotefinder.h"
 
+#ifdef HAVE_CWIID
+#include <cstring>
+#endif
+
 WiimoteFinder::WiimoteFinder() : QThread()
 {
     foundWiimote = 0;
@@ -47,11 +51,15 @@ void WiimoteFinder::pollMotes() {
 }
 
 void WiimoteFinder::run() {
+#ifdef HAVE_CWIID
 //    qDebug() << Q_FUNC_INFO;
     bdaddr_t bdaddr = {{0,0,0,0,0,0}};
     memset(&bdaddr,0,sizeof(bdaddr_t));
     foundWiimoteHandle = cwiid_open(&bdaddr, WiiMote::defaultFlags());
     foundWiimoteReally = true;
+#else
+    qDebug() << "cwiid support not compiled in; Wiimote scanning disabled";
+#endif
 }
 
 void WiimoteFinder::freeMote(WiiMote *wm) {
